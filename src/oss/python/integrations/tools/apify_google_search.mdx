@@ -1,0 +1,115 @@
+---
+title: "Apify Google search integration"
+description: "Integrate with the ApifyGoogleSearchTool tool using LangChain Python."
+---
+
+> [Apify](https://apify.com) is a cloud platform for web scraping and data extraction. The `ApifyGoogleSearchTool` runs the [`apify/google-search-scraper`](https://apify.com/apify/google-search-scraper) Actor and returns structured Google SERP results.
+
+## Overview
+
+This page walks you through using `ApifyGoogleSearchTool` with LangChain to run Google searches and return structured organic results (title, URL, description) as a JSON string. Use it when an agent needs real-time Google search results.
+
+### Integration details
+
+| Class | Package | Serializable | JS support | Version |
+|:------|:--------|:------------:|:----------:|:-------:|
+| [`ApifyGoogleSearchTool`](https://github.com/apify/langchain-apify) | [`langchain-apify`](https://pypi.org/project/langchain-apify/) | ❌ | ❌ | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-apify?style=flat-square&label=%20) |
+
+### Tool features
+
+| Returns artifact | Native async | Return data | Pricing |
+|:----------------:|:------------:|:-----------:|:-------:|
+| ❌ | ❌ | JSON string of `{title, url, description}` per organic result | Pay-per-use, [free tier available](https://apify.com/pricing) |
+
+## Setup
+
+This integration lives in the [`langchain-apify`](https://pypi.org/project/langchain-apify/) package.
+
+```python
+pip install -qU langchain-apify
+```
+
+### Prerequisites
+
+- **Apify account**: Register your free [Apify account](https://console.apify.com/sign-up).
+- **Apify API token**: Get your token from the [integrations page](https://console.apify.com/account/integrations).
+
+```python
+import os
+
+os.environ["APIFY_API_TOKEN"] = "your-apify-api-token"
+os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
+```
+
+## Instantiation
+
+`ApifyGoogleSearchTool` takes no required arguments. The constructor kwargs cap LLM-controllable values so an agent cannot request unbounded resources:
+
+- `max_timeout_secs` (`int`, default `600`): upper bound for the per-call `timeout_secs`.
+- `max_memory_mbytes` (`int`, default `32768`): upper bound for Actor memory.
+- `max_items` (`int`, default `1000`): upper bound for `max_results`.
+- `apify_api_token` (`str | SecretStr | None`): falls back to the `APIFY_API_TOKEN` env var. Stored as `pydantic.SecretStr`.
+
+```python
+from langchain_apify import ApifyGoogleSearchTool
+
+tool = ApifyGoogleSearchTool()
+```
+
+## Invocation
+
+The tool accepts the following invocation arguments:
+
+- `query` (`str`, required): search query string.
+- `max_results` (`int`, default `10`): number of organic results (clamped to the constructor's `max_items`).
+- `country_code` (`str | None`, default `None`): two-letter ISO country code, case-insensitive (`"us"`, `"gb"`).
+- `language_code` (`str | None`, default `None`): two-letter ISO language code (`"en"`, `"fr"`).
+- `timeout_secs` (`int`, default `300`): max time in seconds to wait for the run.
+
+```python
+import json
+
+result = tool.invoke({
+    "query": "best Python web scraping libraries",
+    "max_results": 5,
+    "country_code": "us",
+    "language_code": "en",
+})
+
+for item in json.loads(result):
+    print(f"{item['title']} - {item['url']}")
+```
+
+The return value is a JSON string of an array of `{"title": str, "url": str, "description": str}`.
+
+## Chaining
+
+Provide the tool to an [agent](https://python.langchain.com/docs/tutorials/agents/) so the model can decide when to call it.
+
+```python
+pip install langgraph langchain-openai
+```
+
+```python
+from langchain.agents import create_agent
+from langchain.messages import ToolMessage
+from langchain_openai import ChatOpenAI
+
+
+model = ChatOpenAI(model="gpt-5-mini")
+tools = [tool]
+graph = create_agent(model, tools=tools)
+```
+
+```python
+inputs = {"messages": [("user", "What are the most popular Python web scraping libraries?")]}
+for s in graph.stream(inputs, stream_mode="values"):
+    message = s["messages"][-1]
+    if isinstance(message, ToolMessage):
+        continue
+    message.pretty_print()
+```
+
+## API reference
+
+For input parameters, return types, and source code, see the [`langchain-apify` repository](https://github.com/apify/langchain-apify) and the [Apify integration documentation](https://docs.apify.com/platform/integrations/langchain).
