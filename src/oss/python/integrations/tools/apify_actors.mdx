@@ -7,19 +7,30 @@ description: "Integrate with the Apify actor tool using LangChain Python."
 
 ## Overview
 
-This notebook walks you through using [Apify Actors](https://docs.apify.com/platform/actors) with LangChain to automate web scraping and data extraction. The `langchain-apify` package integrates Apify's cloud-based tools with LangChain agents, enabling efficient data collection and processing for AI applications.
+This page walks you through using [Apify Actors](https://docs.apify.com/platform/actors) with LangChain to automate web scraping and data extraction. The `langchain-apify` package integrates Apify's cloud-based tools with LangChain agents, enabling efficient data collection and processing for AI applications.
+
+### When to use this vs. the dedicated tools
+
+`ApifyActorsTool` is a generic wrapper that runs any Actor by ID. The `langchain-apify` package also exports dedicated tool classes for common use cases. These have a fixed input schema that an LLM can call directly without hand-crafting an Actor input dict. Reach for the dedicated class when one exists for your use case, and fall back to `ApifyActorsTool` when running an arbitrary Actor:
+
+- **Search and crawling**: [`ApifyGoogleSearchTool`](/oss/integrations/tools/apify_google_search), [`ApifyWebCrawlerTool`](/oss/integrations/tools/apify_web_crawler), `ApifyRAGWebBrowserTool`, `ApifyGoogleMapsTool`, `ApifyYouTubeScraperTool`, `ApifyEcommerceScraperTool`.
+- **Social media**: `ApifyInstagramScraperTool`, `ApifyLinkedInProfilePostsTool`, `ApifyLinkedInProfileSearchTool`, `ApifyLinkedInProfileDetailTool`, `ApifyTwitterScraperTool`, `ApifyTikTokScraperTool`, `ApifyFacebookPostsScraperTool`.
+- **Generic Actor and task tools**: `ApifyRunActorTool`, `ApifyRunActorAndGetDatasetTool`, `ApifyGetDatasetItemsTool`, `ApifyScrapeUrlTool`, `ApifyRunTaskTool`, `ApifyRunTaskAndGetDatasetTool`.
+- **Retrieval**: [`ApifySearchRetriever`](/oss/integrations/retrievers/apify_search) returns LangChain `Document` objects directly for RAG chains.
+
+See the [Apify provider page](/oss/integrations/providers/apify) for the full component list and the exported tool grouping constants (`APIFY_SEARCH_TOOLS`, `APIFY_SOCIAL_TOOLS`, `APIFY_CORE_TOOLS`).
 
 ### Integration details
 
 | Class | Package | Serializable | [JS support](https://js.langchain.com/docs/integrations/tools/apify_actors) | Version |
 |:------|:--------|:------------:|:---------------------------------------------------------------------------:|:-------:|
-| [`ApifyActorsTool`](https://github.com/apify/langchain-apify) | [`langchain-apify`](https://pypi.org/project/langchain-apify/) | ✅ | ✅ | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-apify?style=flat-square&label=%20) |
+| [`ApifyActorsTool`](https://github.com/apify/langchain-apify) | [`langchain-apify`](https://pypi.org/project/langchain-apify/) | ❌ | ✅ | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-apify?style=flat-square&label=%20) |
 
 ### Tool features
 
 | Returns artifact | Native async | Return data | Pricing |
 |:----------------:|:------------:|:-----------:|:-------:|
-| ❌ | ✅ | Actor output (varies by Actor) | Pay-per-use, [free tier available](https://apify.com/pricing) |
+| ❌ | ❌ | Actor output (varies by Actor) | Pay-per-use, [free tier available](https://apify.com/pricing) |
 
 ## Setup
 
@@ -37,14 +48,13 @@ pip install langchain-apify
 ```python
 import os
 
-os.environ["APIFY_TOKEN"] = "your-apify-token"
+os.environ["APIFY_API_TOKEN"] = "your-apify-api-token"
 os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 ```
 
 ### Pricing
 
-Apify uses pay-per-use pricing with a free tier available.
-Pricing varies by Actor—some Actors are free (you only pay for platform usage), while others charge per result or event.
+Apify uses pay-per-use pricing with a free tier. Some Actors are free (you only pay for platform compute), while others charge per result or event.
 
 ## Instantiation
 
@@ -58,11 +68,13 @@ tool = ApifyActorsTool("apify/rag-web-browser")
 
 ## Invocation
 
-The `ApifyActorsTool` takes a single argument, which is `run_input` - a dictionary that is passed as a run input to the Actor. Run input schema documentation can be found in the input section of the Actor details page. See [RAG Web Browser input schema](https://apify.com/apify/rag-web-browser/input-schema).
+The `ApifyActorsTool` takes a single argument, `run_input`, that is passed as input to the Actor. Run input schema documentation can be found in the input section of the Actor details page. See [RAG Web Browser input schema](https://apify.com/apify/rag-web-browser/input-schema).
 
 ```python
 tool.invoke({"run_input": {"query": "what is apify?", "maxResults": 2}})
 ```
+
+When invoked by an LLM agent, `run_input` is passed as a JSON-encoded string (the tool's `args_schema` types it as `str`). When invoked directly from Python, a dict works as well; the tool accepts either form.
 
 ## Chaining
 
@@ -105,35 +117,16 @@ Tool Calls:
     run_input: {"run_input":{"query":"Apify","maxResults":3,"outputFormats":["markdown"]}}
 ================================== Ai Message ==================================
 
-Apify is a comprehensive platform for web scraping, browser automation, and data extraction. It offers a wide array of tools and services that cater to developers and businesses looking to extract data from websites efficiently and effectively. Here's an overview of Apify:
-
-1. **Ecosystem and Tools**:
-   - Apify provides an ecosystem where developers can build, deploy, and publish data extraction and web automation tools called Actors.
-   - The platform supports various use cases such as extracting data from social media platforms, conducting automated browser-based tasks, and more.
-
-2. **Offerings**:
-   - Apify offers over 10,000 ready-made scraping tools and code templates.
-   - Users can also build custom solutions or hire Apify's professional services for more tailored data extraction needs.
-
-3. **Technology and Integration**:
-   - The platform supports integration with popular tools and services like Zapier, GitHub, Google Sheets, Pinecone, and more.
-   - Apify supports open-source tools and technologies such as JavaScript, Python, Puppeteer, Playwright, Selenium, and its own Crawlee library for web crawling and browser automation.
-
-4. **Community and Learning**:
-   - Apify hosts a community on Discord where developers can get help and share expertise.
-   - It offers educational resources through the Web Scraping Academy to help users become proficient in data scraping and automation.
-
-5. **Enterprise Solutions**:
-   - Apify provides enterprise-grade web data extraction solutions with high reliability, 99.95% uptime, and compliance with SOC2, GDPR, and CCPA standards.
-
-For more information, you can visit [Apify's official website](https://apify.com/) or their [GitHub page](https://github.com/apify) which contains their code repositories and further details about their projects.
+Apify is a comprehensive platform for web scraping, browser automation, and data
+extraction. It offers a wide array of tools and services for developers and
+businesses to extract data from websites...
 ```
 
 ## Additional Actor examples
 
 The Apify Store contains thousands of prebuilt Actors. Here are examples of other popular Actors:
 
-### Instagram Scraper
+### Instagram scraper
 
 ```python
 from langchain_apify import ApifyActorsTool
@@ -149,7 +142,7 @@ result = instagram_tool.invoke({
 })
 ```
 
-### Google Search Results Scraper
+### Google search results scraper
 
 ```python
 google_search_tool = ApifyActorsTool("apify/google-search-scraper")
@@ -165,24 +158,13 @@ result = google_search_tool.invoke({
 
 Browse the [Apify Store](https://apify.com/store) to discover more Actors for your use case.
 
-## When to use Apify
-
-Apify is ideal when you need:
-
-- **Access to thousands of prebuilt Actors** for various platforms (social media, e-commerce, search engines, etc.)
-- **Custom web scraping and automation workflows** beyond simple search
-- **Infrastructure-free scraping** (a serverless platform handles scaling and maintenance)
-- **Flexible Actor ecosystem** – run any Actor from the Apify Store
-
----
-
 ## API reference
 
 For more information on how to use this integration, see the [git repository](https://github.com/apify/langchain-apify) or the [Apify integration documentation](https://docs.apify.com/platform/integrations/langgraph).
 
 ---
 
-## Using Apify MCP Server
+## Use the Apify MCP server
 
 Unsure which Actor to use or what parameters it requires?
 The [Apify MCP (Model Context Protocol) server](https://mcp.apify.com) can help you discover available Actors, explore their input schemas, and understand parameter requirements through the Model Context Protocol.
@@ -190,22 +172,32 @@ The [Apify MCP (Model Context Protocol) server](https://mcp.apify.com) can help 
 To use the Apify MCP server with LangChain:
 
 ```python
+import asyncio
 import os
-from langchain_mcp_adapters.client import MultiServerMCPClient
+
 from langchain.agents import create_agent
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_openai import ChatOpenAI
 
-client = MultiServerMCPClient({
-    "apify": {
-        "transport": "http",
-        "url": "https://mcp.apify.com",
-        "headers": {
-            "Authorization": f"Bearer {os.environ['APIFY_TOKEN']}",
-        },
-    }
-})
 
-tools = await client.get_tools()
-agent = create_agent("gpt-5-mini", tools)
+async def main():
+    client = MultiServerMCPClient({
+        "apify": {
+            "transport": "http",
+            "url": "https://mcp.apify.com",
+            "headers": {
+                "Authorization": f"Bearer {os.environ['APIFY_API_TOKEN']}",
+            },
+        }
+    })
+
+    tools = await client.get_tools()
+    model = ChatOpenAI(model="gpt-5-mini")
+    graph = create_agent(model, tools=tools)
+    # invoke `graph` here
+
+
+asyncio.run(main())
 ```
 
 For more information, see the [LangChain MCP documentation](/oss/langchain/mcp) and [Apify MCP server](https://mcp.apify.com).
