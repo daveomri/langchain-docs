@@ -7,28 +7,13 @@ description: "Integrate with Apify using LangChain Python."
 >which provides an [ecosystem](https://apify.com/store) of more than a thousand
 >ready-made apps called *Actors* for various scraping, crawling, and extraction use cases.
 
-## Overview
-
-Apify provides access to thousands of prebuilt tools (Actors) for web scraping, data extraction, and automation.
-The platform handles infrastructure management, allowing you to focus on data extraction logic.
-
-## When to use Apify
-
-- **Access to thousands of prebuilt Actors** for various platforms (social media, e-commerce, search engines, etc.)
-- **Custom web scraping and automation workflows** beyond simple search
-- **Flexible Actor ecosystem** – run any Actor from the Apify Store
-
-This integration enables you to run Actors on the `Apify` platform and load their results into LangChain to feed your vector
-indexes with documents and data from the web, e.g., to generate answers from websites with documentation,
-blogs, or knowledge bases.
+The `langchain-apify` package wraps Apify Actors as LangChain tools, a retriever, and document loaders. Run prebuilt Actors for search, scraping, and social media, or any Actor from the [Apify Store](https://apify.com/store) by ID.
 
 ## Installation and setup
 
-- Install the LangChain Apify package for Python with:
-
 <CodeGroup>
 ```bash pip
-pip install langchain-apify
+pip install -qU langchain-apify
 ```
 
 ```bash uv
@@ -36,66 +21,120 @@ uv add langchain-apify
 ```
 </CodeGroup>
 
-- Get your [Apify API token](https://console.apify.com/account/integrations) and either set it as
-  an environment variable (`APIFY_TOKEN`) or pass it as `apify_api_token` in the constructor.
-
-## Tool
-
-You can use the `ApifyActorsTool` to use Apify Actors with agents.
+Get your [Apify API token](https://console.apify.com/account/integrations) and either set it as the `APIFY_API_TOKEN` environment variable or pass it as `apify_api_token` to any component constructor:
 
 ```python
-from langchain_apify import ApifyActorsTool
+import os
+
+os.environ["APIFY_API_TOKEN"] = "your-apify-api-token"
 ```
 
-See [this notebook](/oss/integrations/tools/apify_actors) for example usage and a full example of a tool-calling agent with LangGraph in the [Apify LangGraph agent Actor template](https://apify.com/templates/python-langgraph).
+## Components
 
-For more information on how to use this tool, visit [the Apify integration documentation](https://docs.apify.com/platform/integrations/langgraph).
+### Tools
 
-## Wrapper
+The package exports tools for common scraping use cases plus generic wrappers for running any Actor by ID. Tools are grouped into three exported lists (`APIFY_SEARCH_TOOLS`, `APIFY_SOCIAL_TOOLS`, `APIFY_CORE_TOOLS`) so you can bind a focused subset to an agent, or compose your own list from individual tool classes.
 
-You can use the `ApifyWrapper` to run Actors on the Apify platform.
+#### Search and crawling — `APIFY_SEARCH_TOOLS`
+
+Dedicated wrappers for web search, crawling, and platform-specific search.
+
+| Component | Backing Actor | Docs |
+|---|---|---|
+| `ApifyGoogleSearchTool` | [`apify/google-search-scraper`](https://apify.com/apify/google-search-scraper) | [Actor tool page](/oss/integrations/tools/apify_google_search) |
+| `ApifyWebCrawlerTool` | [`apify/website-content-crawler`](https://apify.com/apify/website-content-crawler) | [Actor tool page](/oss/integrations/tools/apify_web_crawler) |
+| `ApifyRAGWebBrowserTool` | [`apify/rag-web-browser`](https://apify.com/apify/rag-web-browser) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyGoogleMapsTool` | [`compass/crawler-google-places`](https://apify.com/compass/crawler-google-places) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyYouTubeScraperTool` | [`streamers/youtube-scraper`](https://apify.com/streamers/youtube-scraper) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyEcommerceScraperTool` | [`apify/e-commerce-scraping-tool`](https://apify.com/apify/e-commerce-scraping-tool) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+
+#### Social media — `APIFY_SOCIAL_TOOLS`
+
+Scrape posts and profiles from major social platforms.
+
+| Component | Backing Actor | Docs |
+|---|---|---|
+| `ApifyInstagramScraperTool` | [`apify/instagram-scraper`](https://apify.com/apify/instagram-scraper) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyLinkedInProfilePostsTool` | [`apimaestro/linkedin-profile-posts`](https://apify.com/apimaestro/linkedin-profile-posts) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyLinkedInProfileSearchTool` | [`harvestapi/linkedin-profile-search`](https://apify.com/harvestapi/linkedin-profile-search) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyLinkedInProfileDetailTool` | [`apimaestro/linkedin-profile-detail`](https://apify.com/apimaestro/linkedin-profile-detail) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyTwitterScraperTool` | [`apidojo/twitter-scraper-lite`](https://apify.com/apidojo/twitter-scraper-lite) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyTikTokScraperTool` | [`clockworks/tiktok-scraper`](https://apify.com/clockworks/tiktok-scraper) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyFacebookPostsScraperTool` | [`apify/facebook-posts-scraper`](https://apify.com/apify/facebook-posts-scraper) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+
+#### Generic Actor and task tools — `APIFY_CORE_TOOLS`
+
+Run any Actor or task by ID and read items from datasets.
+
+| Component | Description | Docs |
+|---|---|---|
+| `ApifyRunActorTool` | Run an Actor and return run metadata | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyRunActorAndGetDatasetTool` | Run an Actor and return its dataset items | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyGetDatasetItemsTool` | Read items from an existing Apify dataset | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyScrapeUrlTool` | Scrape a single URL to markdown | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyRunTaskTool` | Run a saved Apify task and return run metadata | [Actor tool page](/oss/integrations/tools/apify_actors) |
+| `ApifyRunTaskAndGetDatasetTool` | Run a saved task and return its dataset items | [Actor tool page](/oss/integrations/tools/apify_actors) |
+
+#### Generic Actor wrapper
+
+`ApifyActorsTool` is a single-class wrapper for running an arbitrary Actor whose input is passed as a JSON-encoded string. Use this when no dedicated tool above covers your Actor.
+
+| Component | Backing Actor | Docs |
+|---|---|---|
+| `ApifyActorsTool` | Any Actor (specified at construction) | [Actor tool page](/oss/integrations/tools/apify_actors) |
+
+```python
+from langchain_apify import ApifyGoogleSearchTool
+
+tool = ApifyGoogleSearchTool()
+```
+
+### Retriever
+
+Use `ApifySearchRetriever` to search the web and return results as LangChain `Document` objects, suitable for RAG chains.
+
+| Component | Backing Actor | Docs |
+|---|---|---|
+| `ApifySearchRetriever` | [`apify/rag-web-browser`](https://apify.com/apify/rag-web-browser) | [Retriever page](/oss/integrations/retrievers/apify_search) |
+
+```python
+from langchain_apify import ApifySearchRetriever
+
+retriever = ApifySearchRetriever()
+```
+
+### Document loaders
+
+`ApifyCrawlLoader` crawls a URL on demand. `ApifyDatasetLoader` reads items from a previously completed Actor run by dataset ID.
+
+| Component | Source | Docs |
+|---|---|---|
+| `ApifyCrawlLoader` | Crawls a URL on demand | [Loader page](/oss/integrations/document_loaders/apify_crawl) |
+| `ApifyDatasetLoader` | Reads an existing Apify dataset by ID | [Loader page](/oss/integrations/document_loaders/apify_dataset) |
+
+```python
+from langchain_apify import ApifyCrawlLoader, ApifyDatasetLoader
+```
+
+### Wrapper
+
+`ApifyWrapper` exposes the lower-level Apify client used by the components above.
 
 ```python
 from langchain_apify import ApifyWrapper
 ```
 
-For more information on how to use this wrapper, see [the Apify integration documentation](https://docs.apify.com/platform/integrations/langchain).
+## MCP server
 
-## Use cases
+Apify hosts an [MCP server](https://mcp.apify.com) that exposes Actor discovery and execution to any MCP-compatible agent. Use it instead of the LangChain tools above when:
 
-- **Web scraping**: Extract data from websites, social media, e-commerce sites
-- **Search engine results**: Scrape Google, Bing, and other search engines
-- **Data collection**: Gather structured data for analysis and ML pipelines
-- **Content aggregation**: Collect content from multiple sources for RAG applications
+- You don't know at build time which Actors you need and want the agent to discover them at runtime.
+- You want access to the full [Apify Store](https://apify.com/store) (25,000+ Actors) without importing individual tool classes.
 
-## Document loader
+You can customize the server to include only specific Actors, reducing token usage and keeping agents focused. Configure your selection at [mcp.apify.com](https://mcp.apify.com).
 
-You can also use our `ApifyDatasetLoader` to get data from an Apify dataset.
+See the [Apify MCP documentation](https://docs.apify.com/platform/integrations/mcp) for setup and authorization, and the [LangChain MCP documentation](/oss/langchain/mcp) for connecting MCP servers to LangChain agents.
 
-```python
-from langchain_apify import ApifyDatasetLoader
-```
+## Source
 
-For a more detailed walkthrough of this loader, see [this notebook](/oss/integrations/document_loaders/apify_dataset).
-
-## Pricing
-
-Apify uses pay-per-use or pay-per-event pricing with a free tier available. Pricing varies by Actor:
-
-- Some Actors are free (you only pay for platform compute units)
-- Others charge for results or events
-- **Pay-Per-Event (PPE) pricing**: Many Actors support [PPE pricing](https://docs.apify.com/platform/actors/publishing/monetize/pay-per-event), which is useful when you want predictable, usage-based costs in agent deployments
-- See [Apify pricing](https://apify.com/pricing) for details
-
-Source code for this integration can be found in the [LangChain Apify repository](https://github.com/apify/langchain-apify).
-
-## MCP Server
-
-Unsure which Actor to use or what parameters it requires?
-Apify provides an [MCP (Model Context Protocol) server](https://mcp.apify.com) that helps you discover available Actors, explore their input schemas, and understand parameter requirements.
-
-When connecting to the Apify MCP server over HTTP, include your Apify token in the request headers:
-
-```text
-Authorization: Bearer <APIFY_TOKEN>
-```
+The integration source is at [`apify/langchain-apify`](https://github.com/apify/langchain-apify). For platform-specific guides see the [Apify integration documentation](https://docs.apify.com/platform/integrations/langchain).
