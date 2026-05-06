@@ -1,6 +1,6 @@
 ---
 title: "Apify dataset integration"
-description: "Integrate with the ApifyDatasetLoader document loader using LangChain Python."
+description: "Integrate with the ApifyDatasetLoader using LangChain Python."
 ---
 
 > [Apify Dataset](https://docs.apify.com/platform/storage/dataset) is a scalable append-only storage with sequential access built for storing structured web scraping results, such as a list of products or Google SERPs, and then export them to various formats like JSON, CSV, or Excel. Datasets are mainly used to save results of [Apify Actors](https://apify.com/store), which are serverless cloud programs for various web scraping, crawling, and data extraction use cases.
@@ -27,9 +27,15 @@ This page shows how to use `ApifyDatasetLoader` to load items from an existing A
 
 This integration lives in the [`langchain-apify`](https://pypi.org/project/langchain-apify/) package.
 
-```python
+<CodeGroup>
+```bash pip
 pip install -qU langchain-apify
 ```
+
+```bash uv
+uv add langchain-apify
+```
+</CodeGroup>
 
 ### Prerequisites
 
@@ -42,10 +48,6 @@ import os
 
 os.environ["APIFY_API_TOKEN"] = "your-apify-api-token"
 ```
-
-### Pricing
-
-Apify Actors can be priced in different ways, depending on the Actor you run. Many Actors support [Pay-Per-Event (PPE) pricing](https://docs.apify.com/platform/actors/publishing/monetize/pay-per-event), where you pay for explicit events defined by the Actor author (for example, per dataset item). This can be a good fit for agent workloads where you want clear, per-operation costs.
 
 ## Instantiation
 
@@ -102,7 +104,7 @@ for doc in loader.lazy_load():
 
 This example uses data from the dataset to answer a question. Install the LLM-side dependencies first:
 
-```python
+```bash
 pip install -qU langchain langchain-openai
 ```
 
@@ -152,12 +154,10 @@ For input parameters, return types, and source code, see the [`langchain-apify` 
 
 ## Use the Apify MCP server
 
-Unsure which Actor to use or what parameters it requires? The [Apify MCP (Model Context Protocol) server](https://mcp.apify.com) can help you discover available Actors, explore their input schemas, and understand parameter requirements.
+For discovering Actors and their parameters dynamically, see the [Apify MCP server](/oss/integrations/providers/apify#mcp-server) section on the provider page.
 
-When connecting to the Apify MCP server over HTTP, include your Apify token in the request headers:
+## Additional resources
 
-```text
-Authorization: Bearer <APIFY_API_TOKEN>
-```
-
-For more information, see the [LangChain MCP documentation](/oss/langchain/mcp).
+- [ApifyCrawlLoader](/oss/integrations/document_loaders/apify_crawl): Crawl a URL on demand instead of loading from an existing dataset.
+- [ApifySearchRetriever](/oss/integrations/retrievers/apify_search): Search the web and return results as `Document` objects.
+- [Apify provider page](/oss/integrations/providers/apify): Full list of Apify tools and components for LangChain.

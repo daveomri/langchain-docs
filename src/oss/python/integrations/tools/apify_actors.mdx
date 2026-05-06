@@ -1,6 +1,6 @@
 ---
-title: "Apify actor integration"
-description: "Integrate with the Apify actor tool using LangChain Python."
+title: "Apify Actor integration"
+description: "Integrate with the ApifyActorsTool using LangChain Python."
 ---
 
 >[Apify Actors](https://docs.apify.com/platform/actors) are cloud programs designed for a wide range of web scraping, crawling, and data extraction tasks. These actors facilitate automated data gathering from the web, enabling users to extract, process, and store information efficiently. Actors can be used to perform tasks like scraping e-commerce sites for product details, monitoring price changes, or gathering search engine results. They integrate seamlessly with [Apify Datasets](https://docs.apify.com/platform/storage/dataset), allowing the structured data collected by actors to be stored, managed, and exported in formats like JSON, CSV, or Excel for further analysis or use.
@@ -34,11 +34,17 @@ See the [Apify provider page](/oss/integrations/providers/apify) for the full co
 
 ## Setup
 
-This integration lives in the [langchain-apify](https://pypi.org/project/langchain-apify/) package. The package can be installed using pip.
+This integration lives in the [langchain-apify](https://pypi.org/project/langchain-apify/) package.
 
-```python
+<CodeGroup>
+```bash pip
 pip install langchain-apify
 ```
+
+```bash uv
+uv add langchain-apify
+```
+</CodeGroup>
 
 ### Prerequisites
 
@@ -51,10 +57,6 @@ import os
 os.environ["APIFY_API_TOKEN"] = "your-apify-api-token"
 os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 ```
-
-### Pricing
-
-Apify uses pay-per-use pricing with a free tier. Some Actors are free (you only pay for platform compute), while others charge per result or event.
 
 ## Instantiation
 
@@ -80,7 +82,7 @@ When invoked by an LLM agent, `run_input` is passed as a JSON-encoded string (th
 
 We can provide the created tool to an [agent](https://python.langchain.com/docs/tutorials/agents/). When asked to search for information, the agent will call the Apify Actor, which will search the web, and then retrieve the search results.
 
-```python
+```bash
 pip install langgraph langchain-openai
 ```
 
@@ -160,44 +162,14 @@ Browse the [Apify Store](https://apify.com/store) to discover more Actors for yo
 
 ## API reference
 
-For more information on how to use this integration, see the [git repository](https://github.com/apify/langchain-apify) or the [Apify integration documentation](https://docs.apify.com/platform/integrations/langgraph).
-
----
+For more information on how to use this integration, see the [git repository](https://github.com/apify/langchain-apify) or the [Apify integration documentation](https://docs.apify.com/platform/integrations/langchain).
 
 ## Use the Apify MCP server
 
-Unsure which Actor to use or what parameters it requires?
-The [Apify MCP (Model Context Protocol) server](https://mcp.apify.com) can help you discover available Actors, explore their input schemas, and understand parameter requirements through the Model Context Protocol.
+For discovering Actors and their parameters dynamically, you can also use the [Apify MCP server](/oss/integrations/providers/apify#mcp-server).
 
-To use the Apify MCP server with LangChain:
+## Additional resources
 
-```python
-import asyncio
-import os
-
-from langchain.agents import create_agent
-from langchain_mcp_adapters.client import MultiServerMCPClient
-from langchain_openai import ChatOpenAI
-
-
-async def main():
-    client = MultiServerMCPClient({
-        "apify": {
-            "transport": "http",
-            "url": "https://mcp.apify.com",
-            "headers": {
-                "Authorization": f"Bearer {os.environ['APIFY_API_TOKEN']}",
-            },
-        }
-    })
-
-    tools = await client.get_tools()
-    model = ChatOpenAI(model="gpt-5-mini")
-    graph = create_agent(model, tools=tools)
-    # invoke `graph` here
-
-
-asyncio.run(main())
-```
-
-For more information, see the [LangChain MCP documentation](/oss/langchain/mcp) and [Apify MCP server](https://mcp.apify.com).
+- [Apify provider page](/oss/integrations/providers/apify): Full list of dedicated tools for common use cases (search, social media, core tools).
+- [ApifyWebCrawlerTool](/oss/integrations/tools/apify_web_crawler): Dedicated tool for crawling websites with a simpler interface.
+- [ApifyGoogleSearchTool](/oss/integrations/tools/apify_google_search): Dedicated tool for Google search results.

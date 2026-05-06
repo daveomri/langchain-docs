@@ -1,11 +1,11 @@
 ---
 title: "Apify search retriever integration"
-description: "Integrate with the ApifySearchRetriever retriever using LangChain Python."
+description: "Integrate with the ApifySearchRetriever using LangChain Python."
 ---
 
 > [Apify](https://apify.com) is a cloud platform for web scraping and data extraction. The `ApifySearchRetriever` runs the [`apify/rag-web-browser`](https://apify.com/apify/rag-web-browser) Actor to search the web, crawl the top results, and return them as LangChain `Document` objects.
 
-This page shows how to use `ApifySearchRetriever` to add real-time web search to a [RAG chain](/oss/langchain/rag). Compared to [`ApifyRAGWebBrowserTool`](/oss/integrations/tools/apify_actors), which wraps the same Actor and returns a flat JSON array, the retriever returns LangChain `Document` objects so it can drop straight into a standard retrieval chain.
+This page shows how to use `ApifySearchRetriever` to add real-time web search to a [RAG chain](/oss/langchain/rag). Compared to [`ApifyRAGWebBrowserTool`](/oss/integrations/tools/apify_actors), which wraps the same Actor and returns a flat JSON array, the retriever returns LangChain `Document` objects so it fits directly into a standard retrieval chain.
 
 ## Overview
 
@@ -19,9 +19,15 @@ This page shows how to use `ApifySearchRetriever` to add real-time web search to
 
 This integration lives in the [`langchain-apify`](https://pypi.org/project/langchain-apify/) package.
 
-```python
+<CodeGroup>
+```bash pip
 pip install -qU langchain-apify
 ```
+
+```bash uv
+uv add langchain-apify
+```
+</CodeGroup>
 
 ### Prerequisites
 
@@ -70,7 +76,7 @@ Each document's `page_content` is the crawled text or markdown for one result. T
 
 ## Use within a chain
 
-Drop the retriever into a standard RAG chain:
+Use the retriever within a standard RAG chain:
 
 ```python
 from langchain_core.output_parsers import StrOutputParser
@@ -101,3 +107,9 @@ print(chain.invoke("What does the Apify platform do?"))
 ## API reference
 
 For input parameters, return types, and source code, see the [`langchain-apify` repository](https://github.com/apify/langchain-apify) and the [Apify integration documentation](https://docs.apify.com/platform/integrations/langchain).
+
+## Additional resources
+
+- [ApifyRAGWebBrowserTool](/oss/integrations/tools/apify_actors): Tool version that returns JSON instead of `Document` objects.
+- [ApifyGoogleSearchTool](/oss/integrations/tools/apify_google_search): Dedicated tool for Google search results.
+- [Apify provider page](/oss/integrations/providers/apify): Full list of Apify tools and components for LangChain.

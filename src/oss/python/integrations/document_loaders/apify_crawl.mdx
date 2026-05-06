@@ -1,6 +1,6 @@
 ---
 title: "Apify crawl integration"
-description: "Integrate with the ApifyCrawlLoader document loader using LangChain Python."
+description: "Integrate with the ApifyCrawlLoader using LangChain Python."
 ---
 
 > [Apify](https://apify.com) is a cloud platform for web scraping and data extraction. The `ApifyCrawlLoader` runs the [`apify/website-content-crawler`](https://apify.com/apify/website-content-crawler) Actor to crawl a website on demand and turn each page into a LangChain `Document`.
@@ -27,9 +27,15 @@ This page shows how to use `ApifyCrawlLoader` to crawl a website starting from a
 
 This integration lives in the [`langchain-apify`](https://pypi.org/project/langchain-apify/) package.
 
-```python
+<CodeGroup>
+```bash pip
 pip install -qU langchain-apify
 ```
+
+```bash uv
+uv add langchain-apify
+```
+</CodeGroup>
 
 ### Prerequisites
 
@@ -110,3 +116,9 @@ print(vectorstore.similarity_search("how do I run an Actor?", k=2))
 ## API reference
 
 For input parameters, return types, and source code, see the [`langchain-apify` repository](https://github.com/apify/langchain-apify) and the [Apify integration documentation](https://docs.apify.com/platform/integrations/langchain).
+
+## Additional resources
+
+- [ApifyDatasetLoader](/oss/integrations/document_loaders/apify_dataset): Load items from an existing dataset instead of crawling on demand.
+- [ApifyWebCrawlerTool](/oss/integrations/tools/apify_web_crawler): Agent-callable tool that wraps the same Actor and returns JSON.
+- [Apify provider page](/oss/integrations/providers/apify): Full list of Apify tools and components for LangChain.

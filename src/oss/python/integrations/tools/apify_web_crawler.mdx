@@ -1,6 +1,6 @@
 ---
 title: "Apify web crawler integration"
-description: "Integrate with the ApifyWebCrawlerTool tool using LangChain Python."
+description: "Integrate with the ApifyWebCrawlerTool using LangChain Python."
 ---
 
 > [Apify](https://apify.com) is a cloud platform for web scraping and data extraction. The `ApifyWebCrawlerTool` runs the [`apify/website-content-crawler`](https://apify.com/apify/website-content-crawler) Actor and returns each crawled page's content as markdown.
@@ -101,7 +101,7 @@ result = tool.invoke({
 
 Provide the tool to an [agent](https://python.langchain.com/docs/tutorials/agents/) so the model can decide when to call it.
 
-```python
+```bash
 pip install langgraph langchain-openai
 ```
 
@@ -117,7 +117,7 @@ graph = create_agent(model, tools=tools)
 ```
 
 ```python
-inputs = {"messages": [("user", "Crawl https://docs.apify.com and summarise what the platform does.")]}
+inputs = {"messages": [("user", "Crawl https://docs.apify.com and summarize what the platform does.")]}
 for s in graph.stream(inputs, stream_mode="values"):
     message = s["messages"][-1]
     if isinstance(message, ToolMessage):

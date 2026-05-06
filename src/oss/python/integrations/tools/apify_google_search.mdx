@@ -1,9 +1,9 @@
 ---
 title: "Apify Google search integration"
-description: "Integrate with the ApifyGoogleSearchTool tool using LangChain Python."
+description: "Integrate with the ApifyGoogleSearchTool using LangChain Python."
 ---
 
-> [Apify](https://apify.com) is a cloud platform for web scraping and data extraction. The `ApifyGoogleSearchTool` runs the [`apify/google-search-scraper`](https://apify.com/apify/google-search-scraper) Actor and returns structured Google SERP results.
+> [Apify](https://apify.com) is a cloud platform for web scraping and data extraction. The `ApifyGoogleSearchTool` runs the [`apify/google-search-scraper`](https://apify.com/apify/google-search-scraper) Actor and returns structured Google search engine results page (SERP) results.
 
 ## Overview
 
@@ -25,9 +25,15 @@ This page walks you through using `ApifyGoogleSearchTool` with LangChain to run 
 
 This integration lives in the [`langchain-apify`](https://pypi.org/project/langchain-apify/) package.
 
-```python
+<CodeGroup>
+```bash pip
 pip install -qU langchain-apify
 ```
+
+```bash uv
+uv add langchain-apify
+```
+</CodeGroup>
 
 ### Prerequisites
 
@@ -86,7 +92,7 @@ The return value is a JSON string of an array of `{"title": str, "url": str, "de
 
 Provide the tool to an [agent](https://python.langchain.com/docs/tutorials/agents/) so the model can decide when to call it.
 
-```python
+```bash
 pip install langgraph langchain-openai
 ```
 
@@ -113,3 +119,9 @@ for s in graph.stream(inputs, stream_mode="values"):
 ## API reference
 
 For input parameters, return types, and source code, see the [`langchain-apify` repository](https://github.com/apify/langchain-apify) and the [Apify integration documentation](https://docs.apify.com/platform/integrations/langchain).
+
+## Additional resources
+
+- [ApifySearchRetriever](/oss/integrations/retrievers/apify_search): For RAG chains that need `Document` objects instead of JSON.
+- [ApifyWebCrawlerTool](/oss/integrations/tools/apify_web_crawler): Dedicated tool for crawling entire websites.
+- [Apify provider page](/oss/integrations/providers/apify): Full list of Apify tools and components for LangChain.
