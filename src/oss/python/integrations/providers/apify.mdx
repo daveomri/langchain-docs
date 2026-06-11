@@ -109,7 +109,9 @@ Dedicated wrappers for web search, crawling, and platform-specific search.
 Bind all search tools to an agent at once:
 
 ```python
+from langchain.agents import create_agent
 from langchain_apify import APIFY_SEARCH_TOOLS
+from langchain_openai import ChatOpenAI
 
 # APIFY_SEARCH_TOOLS is a list of instantiated tool classes
 # [ApifyGoogleSearchTool(), ApifyWebCrawlerTool(), ApifyRAGWebBrowserTool(), ...]
@@ -193,7 +195,9 @@ Scrape posts and profiles from major social platforms.
 Bind all social media tools to an agent at once:
 
 ```python
+from langchain.agents import create_agent
 from langchain_apify import APIFY_SOCIAL_TOOLS
+from langchain_openai import ChatOpenAI
 
 # APIFY_SOCIAL_TOOLS is a list of instantiated tool classes
 # [ApifyInstagramScraperTool(), ApifyLinkedInProfilePostsTool(), ...]
@@ -260,7 +264,9 @@ Run any Actor or task by ID and read items from datasets.
 Bind all core tools to an agent at once:
 
 ```python
+from langchain.agents import create_agent
 from langchain_apify import APIFY_CORE_TOOLS
+from langchain_openai import ChatOpenAI
 
 # APIFY_CORE_TOOLS is a list of instantiated tool classes
 # [ApifyRunActorTool(), ApifyRunActorAndGetDatasetTool(), ...]
