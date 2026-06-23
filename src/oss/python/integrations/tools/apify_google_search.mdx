@@ -43,7 +43,7 @@ uv add langchain-apify
 ```python
 import os
 
-os.environ["APIFY_API_TOKEN"] = "your-apify-api-token"
+os.environ["APIFY_TOKEN"] = "your-apify-token"
 os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 ```
 
@@ -54,7 +54,7 @@ os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 - `max_timeout_secs` (`int`, default `600`): upper bound for the per-call `timeout_secs`.
 - `max_memory_mbytes` (`int`, default `32768`): upper bound for Actor memory.
 - `max_items` (`int`, default `1000`): upper bound for `max_results`.
-- `apify_api_token` (`str | SecretStr | None`): falls back to the `APIFY_API_TOKEN` env var. Stored as `pydantic.SecretStr`.
+- `apify_token` (`str | SecretStr | None`): Apify API token. Falls back to the `APIFY_TOKEN` env var. Stored as `pydantic.SecretStr`. The kwarg `apify_api_token` and the env var `APIFY_API_TOKEN` are honored as deprecated aliases.
 
 ```python
 from langchain_apify import ApifyGoogleSearchTool

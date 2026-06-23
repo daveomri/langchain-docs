@@ -45,7 +45,7 @@ uv add langchain-apify
 ```python
 import os
 
-os.environ["APIFY_API_TOKEN"] = "your-apify-api-token"
+os.environ["APIFY_TOKEN"] = "your-apify-token"
 os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 ```
 
@@ -58,7 +58,7 @@ os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 - `max_crawl_depth` (`int`, default `1`): maximum link-follow depth from the seed.
 - `crawler_type` (`Literal["cheerio", "playwright:adaptive", "playwright:firefox"]`, default `"cheerio"`): rendering engine for the crawl. Use `cheerio` for static HTML; switch to a Playwright engine for JavaScript-rendered sites.
 - `timeout_secs` (`int`, default `300`): max time in seconds to wait for the run.
-- `apify_api_token` (`str | SecretStr | None`): falls back to the `APIFY_API_TOKEN` env var. Accepted as `str` or `pydantic.SecretStr`; forwarded to the Apify client and not retained on the loader instance.
+- `apify_token` (`str | SecretStr | None`): Apify API token. Falls back to the `APIFY_TOKEN` env var. Accepted as `str` or `pydantic.SecretStr`; forwarded to the Apify client and not retained on the loader instance. The kwarg `apify_api_token` and the env var `APIFY_API_TOKEN` are honored as deprecated aliases.
 
 Unlike the tool variants, the loader does not clamp `max_crawl_pages`, `max_crawl_depth`, or `timeout_secs`. Pass values you trust.
 

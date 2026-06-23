@@ -37,7 +37,7 @@ uv add langchain-apify
 ```python
 import os
 
-os.environ["APIFY_API_TOKEN"] = "your-apify-api-token"
+os.environ["APIFY_TOKEN"] = "your-apify-token"
 os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 ```
 
@@ -47,7 +47,7 @@ os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 
 - `max_results` (`int`, default `5`): maximum number of documents returned per query.
 - `timeout_secs` (`int`, default `300`): max time in seconds to wait for the run.
-- `apify_api_token` (`str | SecretStr | None`): falls back to the `APIFY_API_TOKEN` env var. Stored as `pydantic.SecretStr`.
+- `apify_token` (`str | SecretStr | None`): Apify API token. Falls back to the `APIFY_TOKEN` env var. Stored as `pydantic.SecretStr`. The kwarg `apify_api_token` and the env var `APIFY_API_TOKEN` are honored as deprecated aliases.
 
 ```python
 from langchain_apify import ApifySearchRetriever

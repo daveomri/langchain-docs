@@ -22,12 +22,12 @@ uv add langchain-apify
 ```
 </CodeGroup>
 
-Get your [Apify API token](https://console.apify.com/account/integrations) and either set it as the `APIFY_API_TOKEN` environment variable or pass it as `apify_api_token` to any component constructor:
+Get your [Apify API token](https://console.apify.com/account/integrations) and either set it as the `APIFY_TOKEN` environment variable or pass it as `apify_token` to any component constructor. (The legacy `APIFY_API_TOKEN` env var and `apify_api_token` kwarg are honored as deprecated aliases.)
 
 ```python
 import os
 
-os.environ["APIFY_API_TOKEN"] = "your-apify-api-token"
+os.environ["APIFY_TOKEN"] = "your-apify-token"
 ```
 
 ## Components
@@ -329,7 +329,7 @@ loader = ApifyCrawlLoader(url="https://docs.apify.com")
 
 Use the **tools above** when building AI agents that decide when to call Apify. Use **`ApifyWrapper`** when writing direct Python code that needs to run Actors programmatically, transform results into `Document` objects, or run async workflows.
 
-With `APIFY_API_TOKEN` set:
+With `APIFY_TOKEN` set:
 
 ```python
 from langchain_apify import ApifyWrapper
@@ -337,23 +337,34 @@ from langchain_apify import ApifyWrapper
 apify = ApifyWrapper()
 ```
 
-Use `call_actor()` to run any Actor by ID and get the run result:
+Use `call_actor()` to run any Actor by ID. It returns an `ApifyDatasetLoader` that maps each dataset item to a LangChain `Document` via the function you pass:
 
 ```python
-# Run an Actor and get the dataset items
-result = apify.call_actor(
+from langchain_core.documents import Document
+
+loader = apify.call_actor(
     actor_id="apify/website-content-crawler",
-    run_input={"url": "https://docs.apify.com", "maxCrawlPages": 5}
+    run_input={"url": "https://docs.apify.com", "maxCrawlPages": 5},
+    dataset_mapping_function=lambda item: Document(
+        page_content=item.get("text", "") or "",
+        metadata={"source": item.get("url", "")},
+    ),
 )
-print(result["items"])  # List of dataset items
+documents = loader.load()
 ```
 
-Use `call_actor_task()` to run a saved [Apify task](https://docs.apify.com/platform/actors/running/tasks) by ID:
+Use `call_actor_task()` to run a saved [Apify task](https://docs.apify.com/platform/actors/running/tasks) by ID. The signature mirrors `call_actor()`:
 
 ```python
-# Run a saved task (preconfigured Actor with fixed inputs)
-result = apify.call_actor_task(task_id="your-task-id")
-print(result["items"])
+loader = apify.call_actor_task(
+    task_id="your-task-id",
+    task_input={},
+    dataset_mapping_function=lambda item: Document(
+        page_content=item.get("text", "") or "",
+        metadata={"source": item.get("url", "")},
+    ),
+)
+documents = loader.load()
 ```
 
 Async variants (`acall_actor()`, `acall_actor_task()`) are also available for async workflows.
@@ -376,7 +387,7 @@ async with MultiServerMCPClient({
     "apify": {
         "transport": "http",
         "url": "https://mcp.apify.com",
-        "headers": {"Authorization": "Bearer <APIFY_API_TOKEN>"},
+        "headers": {"Authorization": "Bearer <APIFY_TOKEN>"},
     }
 }) as client:
     tools = await client.get_tools()
