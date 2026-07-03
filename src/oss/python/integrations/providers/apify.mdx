@@ -22,7 +22,7 @@ uv add langchain-apify
 ```
 </CodeGroup>
 
-Get your [Apify API token](https://console.apify.com/account/integrations) and either set it as the `APIFY_TOKEN` environment variable or pass it as `apify_token` to any component constructor. (The legacy `APIFY_API_TOKEN` env var and `apify_api_token` kwarg are honored as deprecated aliases.)
+Get your [Apify API token](https://console.apify.com/account/integrations) and either set it as the `APIFY_TOKEN` environment variable or pass it as `apify_token` to any component constructor. (The legacy `APIFY_API_TOKEN` env var and `apify_api_token` kwarg are honoured as deprecated aliases.)
 
 ```python
 import os
@@ -73,7 +73,7 @@ Dedicated wrappers for web search, crawling, and platform-specific search.
 
         *Uses Actor: [apify/rag-web-browser](https://apify.com/apify/rag-web-browser)*
 
-        Searches the web and returns the top results' content as a flat JSON array of `{url, title, content}`. For LangChain `Document` objects (RAG chains) use [`ApifySearchRetriever`](/oss/integrations/retrievers/apify_search) instead, which wraps the same Actor.
+        Searches the web and returns the top results' content as a JSON envelope (`{run, items}`), where each item is `{url, title, content}`. For LangChain `Document` objects (RAG chains) use [`ApifySearchRetriever`](/oss/integrations/retrievers/apify_search) instead, which wraps the same Actor.
 
         [learn more](/oss/integrations/tools/apify_actors)
     </Accordion>
@@ -238,7 +238,7 @@ Run any Actor or task by ID and read items from datasets.
     <Accordion title="ApifyScrapeUrlTool">
         `from langchain_apify import ApifyScrapeUrlTool`
 
-        Scrapes a single URL and returns its content as a plain markdown string (not JSON).
+        Scrapes a single URL and returns a JSON envelope (`{run, items}`) with the scraped markdown in the single item's `content` field.
 
 
         [learn more](/oss/integrations/tools/apify_actors)
