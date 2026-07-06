@@ -25,9 +25,15 @@ This page walks you through using `ApifyWebCrawlerTool` with LangChain to crawl 
 
 This integration lives in the [`langchain-apify`](https://pypi.org/project/langchain-apify/) package.
 
-```bash
+<CodeGroup>
+```bash pip
 pip install -qU langchain-apify
 ```
+
+```bash uv
+uv add langchain-apify
+```
+</CodeGroup>
 
 ### Prerequisites
 
@@ -49,7 +55,7 @@ os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 - `max_memory_mbytes` (`int`, default `32768`): upper bound for Actor memory.
 - `max_items` (`int`, default `1000`): upper bound for `max_crawl_pages`.
 - `max_crawl_depth` (`int`, default `5`): upper bound for the per-call `max_crawl_depth`.
-- `apify_token` (`str | SecretStr | None`): Apify API token. Falls back to the `APIFY_TOKEN` env var. Stored as `pydantic.SecretStr`. The kwarg `apify_api_token` and the env var `APIFY_API_TOKEN` are honoured as deprecated aliases.
+- `apify_token` (`str | SecretStr | None`): Apify API token. Falls back to the `APIFY_TOKEN` env var. Stored as `pydantic.SecretStr`. The kwarg `apify_api_token` and the env var `APIFY_API_TOKEN` are honored as deprecated aliases.
 
 ```python
 from langchain_apify import ApifyWebCrawlerTool
@@ -100,21 +106,21 @@ result = tool.invoke({
 
 ## Chaining
 
-Provide the tool to an [agent](https://python.langchain.com/docs/tutorials/agents/) so the model can decide when to call it.
+Provide the tool to an [agent](/oss/langchain/agents) so the model can decide when to call it.
 
 ```bash
 pip install langgraph langchain-openai
 ```
 
 ```python
-from langchain.agents import create_agent
-from langchain.messages import ToolMessage
+from langchain_core.messages import ToolMessage
 from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
 
 
-model = ChatOpenAI(model="gpt-5-mini")
+model = ChatOpenAI(model="gpt-5.4-mini")
 tools = [tool]
-graph = create_agent(model, tools=tools)
+graph = create_react_agent(model, tools)
 ```
 
 ```python

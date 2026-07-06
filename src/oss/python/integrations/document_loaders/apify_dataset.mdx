@@ -55,7 +55,7 @@ os.environ["APIFY_TOKEN"] = "your-apify-token"
 
 - `dataset_id` (`str`, required): ID of an existing Apify dataset.
 - `dataset_mapping_function` (`Callable[[dict], Document]`, required): function that converts one raw dataset item into a LangChain `Document`. The `metadata` schema is whatever this function returns.
-- `apify_token` (`str | SecretStr | None`): Apify API token. Falls back to the `APIFY_TOKEN` env var (set automatically when running on the Apify platform). The kwarg `apify_api_token` and the env var `APIFY_API_TOKEN` are honoured as deprecated aliases.
+- `apify_token` (`str | SecretStr | None`): Apify API token. Falls back to the `APIFY_TOKEN` env var (set automatically when running on the Apify platform). The kwarg `apify_api_token` and the env var `APIFY_API_TOKEN` are honored as deprecated aliases.
 
 For example, if your dataset items are shaped like:
 
@@ -133,7 +133,7 @@ index = VectorstoreIndexCreator(
     vectorstore_cls=InMemoryVectorStore, embedding=OpenAIEmbeddings()
 ).from_loaders([loader])
 
-llm = ChatOpenAI(model="gpt-5-mini")
+llm = ChatOpenAI(model="gpt-5.4-mini")
 
 query = "What is Apify?"
 result = index.query_with_sources(query, llm=llm)

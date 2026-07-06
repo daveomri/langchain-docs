@@ -38,7 +38,7 @@ This integration lives in the [langchain-apify](https://pypi.org/project/langcha
 
 <CodeGroup>
 ```bash pip
-pip install langchain-apify
+pip install -qU langchain-apify
 ```
 
 ```bash uv
@@ -76,25 +76,25 @@ The `ApifyActorsTool` takes a single argument, `run_input`, that is passed as in
 tool.invoke({"run_input": {"query": "what is apify?", "maxResults": 2}})
 ```
 
-When invoked by an LLM agent, `run_input` is passed as a JSON-encoded string (the tool's `args_schema` types it as `str`). When invoked directly from Python, a dict works as well; the tool accepts either form.
+When invoked by an LLM agent, `run_input` is typically passed as a JSON-encoded string (the tool's `args_schema` accepts `str | dict`, and its schema description instructs the model to send JSON). When invoked directly from Python, a dict works as well; the tool accepts either form.
 
 ## Chaining
 
-We can provide the created tool to an [agent](https://python.langchain.com/docs/tutorials/agents/). When asked to search for information, the agent will call the Apify Actor, which will search the web, and then retrieve the search results.
+We can provide the created tool to an [agent](/oss/langchain/agents). When asked to search for information, the agent will call the Apify Actor, which will search the web, and then retrieve the search results.
 
 ```bash
 pip install langgraph langchain-openai
 ```
 
 ```python
-from langchain.messages import ToolMessage
+from langchain_core.messages import ToolMessage
 from langchain_openai import ChatOpenAI
-from langchain.agents import create_agent
+from langgraph.prebuilt import create_react_agent
 
 
-model = ChatOpenAI(model="gpt-5-mini")
+model = ChatOpenAI(model="gpt-5.4-mini")
 tools = [tool]
-graph = create_agent(model, tools=tools)
+graph = create_react_agent(model, tools)
 ```
 
 ```python

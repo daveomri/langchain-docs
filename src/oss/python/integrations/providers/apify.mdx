@@ -22,7 +22,7 @@ uv add langchain-apify
 ```
 </CodeGroup>
 
-Get your [Apify API token](https://console.apify.com/account/integrations) and either set it as the `APIFY_TOKEN` environment variable or pass it as `apify_token` to any component constructor. (The legacy `APIFY_API_TOKEN` env var and `apify_api_token` kwarg are honoured as deprecated aliases.)
+Get your [Apify API token](https://console.apify.com/account/integrations) and either set it as the `APIFY_TOKEN` environment variable or pass it as `apify_token` to any component constructor. (The legacy `APIFY_API_TOKEN` env var and `apify_api_token` kwarg are honored as deprecated aliases.)
 
 ```python
 import os
@@ -34,7 +34,7 @@ os.environ["APIFY_TOKEN"] = "your-apify-token"
 
 ### Tools
 
-The package exports tools for common scraping use-cases plus generic wrappers for running any Actor by ID. Tools are grouped into three exported lists (`APIFY_SEARCH_TOOLS`, `APIFY_SOCIAL_TOOLS`, `APIFY_CORE_TOOLS`) so you can bind a focused subset to an agent, or compose your own list from individual tool classes.
+The package exports tools for common scraping use cases plus generic wrappers for running any Actor by ID. Tools are grouped into three exported lists (`APIFY_SEARCH_TOOLS`, `APIFY_SOCIAL_TOOLS`, `APIFY_CORE_TOOLS`) so you can bind a focused subset to an agent, or compose your own list from individual tool classes.
 
 All tools follow the same pattern; import the class and instantiate:
 
@@ -109,15 +109,17 @@ Dedicated wrappers for web search, crawling, and platform-specific search.
 Bind all search tools to an agent at once:
 
 ```python
-from langchain.agents import create_agent
 from langchain_apify import APIFY_SEARCH_TOOLS
 from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
 
-# APIFY_SEARCH_TOOLS is a list of instantiated tool classes
-# [ApifyGoogleSearchTool(), ApifyWebCrawlerTool(), ApifyRAGWebBrowserTool(), ...]
+# APIFY_SEARCH_TOOLS is a list of tool *classes*, not instances:
+# [ApifyGoogleSearchTool, ApifyWebCrawlerTool, ApifyRAGWebBrowserTool, ...]
+# Instantiate each class before binding it to an agent.
 
-model = ChatOpenAI(model="gpt-5-mini")
-graph = create_agent(model, tools=APIFY_SEARCH_TOOLS)
+model = ChatOpenAI(model="gpt-5.4-mini")
+tools = [tool_cls() for tool_cls in APIFY_SEARCH_TOOLS]
+graph = create_react_agent(model, tools)
 ```
 
 #### Social media (`APIFY_SOCIAL_TOOLS`)
@@ -195,15 +197,17 @@ Scrape posts and profiles from major social platforms.
 Bind all social media tools to an agent at once:
 
 ```python
-from langchain.agents import create_agent
 from langchain_apify import APIFY_SOCIAL_TOOLS
 from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
 
-# APIFY_SOCIAL_TOOLS is a list of instantiated tool classes
-# [ApifyInstagramScraperTool(), ApifyLinkedInProfilePostsTool(), ...]
+# APIFY_SOCIAL_TOOLS is a list of tool *classes*, not instances:
+# [ApifyInstagramScraperTool, ApifyLinkedInProfilePostsTool, ...]
+# Instantiate each class before binding it to an agent.
 
-model = ChatOpenAI(model="gpt-5-mini")
-graph = create_agent(model, tools=APIFY_SOCIAL_TOOLS)
+model = ChatOpenAI(model="gpt-5.4-mini")
+tools = [tool_cls() for tool_cls in APIFY_SOCIAL_TOOLS]
+graph = create_react_agent(model, tools)
 ```
 
 #### Generic Actor and task tools (`APIFY_CORE_TOOLS`)
@@ -264,26 +268,28 @@ Run any Actor or task by ID and read items from datasets.
 Bind all core tools to an agent at once:
 
 ```python
-from langchain.agents import create_agent
 from langchain_apify import APIFY_CORE_TOOLS
 from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
 
-# APIFY_CORE_TOOLS is a list of instantiated tool classes
-# [ApifyRunActorTool(), ApifyRunActorAndGetDatasetTool(), ...]
+# APIFY_CORE_TOOLS is a list of tool *classes*, not instances:
+# [ApifyRunActorTool, ApifyRunActorAndGetDatasetTool, ...]
+# Instantiate each class before binding it to an agent.
 
-model = ChatOpenAI(model="gpt-5-mini")
-graph = create_agent(model, tools=APIFY_CORE_TOOLS)
+model = ChatOpenAI(model="gpt-5.4-mini")
+tools = [tool_cls() for tool_cls in APIFY_CORE_TOOLS]
+graph = create_react_agent(model, tools)
 ```
 
 #### Generic Actor wrapper
 
-`ApifyActorsTool` is a single-class wrapper for running an arbitrary Actor whose input is passed as a JSON-encoded string. Use this when no dedicated tool above covers your Actor.
+`ApifyActorsTool` is a single-class wrapper for running an arbitrary Actor, whose input you pass as a `run_input` dict (or a JSON-encoded string). Use this when no dedicated tool above covers your Actor.
 
 <AccordionGroup>
     <Accordion title="ApifyActorsTool">
         `from langchain_apify import ApifyActorsTool`
 
-        Fallback for any Actor not covered by a dedicated tool. Construct with the Actor ID; the agent passes a `run_input` dict matching the Actor's input schema. The tool serializes it as a JSON-encoded string when calling the Apify API.
+        Fallback for any Actor not covered by a dedicated tool. Construct with the Actor ID; the agent passes a `run_input` matching the Actor's input schema. The `args_schema` accepts either a dict or a JSON-encoded string (an LLM agent typically sends JSON, which the tool parses before running the Actor).
 
 
         [learn more](/oss/integrations/tools/apify_actors)
@@ -344,7 +350,7 @@ from langchain_core.documents import Document
 
 loader = apify.call_actor(
     actor_id="apify/website-content-crawler",
-    run_input={"url": "https://docs.apify.com", "maxCrawlPages": 5},
+    run_input={"startUrls": [{"url": "https://docs.apify.com"}], "maxCrawlPages": 5},
     dataset_mapping_function=lambda item: Document(
         page_content=item.get("text", "") or "",
         metadata={"source": item.get("url", "")},
@@ -381,19 +387,21 @@ Connect the Apify MCP server to a LangChain agent:
 ```python
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import ChatOpenAI
-from langchain.agents import create_agent
+from langgraph.prebuilt import create_react_agent
 
-async with MultiServerMCPClient({
+client = MultiServerMCPClient({
     "apify": {
         "transport": "http",
         "url": "https://mcp.apify.com",
         "headers": {"Authorization": "Bearer <APIFY_TOKEN>"},
     }
-}) as client:
-    tools = await client.get_tools()
-    model = ChatOpenAI(model="gpt-5-mini")
-    graph = create_agent(model, tools=tools)
-    # Invoke the agent here
+})
+
+# get_tools() is async; call it inside an async function (or `await` it in a notebook).
+tools = await client.get_tools()
+model = ChatOpenAI(model="gpt-5.4-mini")
+graph = create_react_agent(model, tools)
+# Invoke the agent here
 ```
 
 You can customize the server to include only specific Actors, reducing token usage and keeping agents focused. Configure your selection at [mcp.apify.com](https://mcp.apify.com).
