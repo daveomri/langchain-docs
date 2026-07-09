@@ -391,7 +391,7 @@ from langgraph.prebuilt import create_react_agent
 
 client = MultiServerMCPClient({
     "apify": {
-        "transport": "http",
+        "transport": "streamable_http",
         "url": "https://mcp.apify.com",
         "headers": {"Authorization": "Bearer <APIFY_TOKEN>"},
     }

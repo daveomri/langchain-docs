@@ -105,7 +105,7 @@ for doc in loader.lazy_load():
 This example uses data from the dataset to answer a question. Install the LLM-side dependencies first:
 
 ```bash
-pip install -qU langchain langchain-openai
+pip install -qU langchain-openai
 ```
 
 ```python
@@ -115,9 +115,9 @@ os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 ```
 
 ```python
-from langchain.indexes import VectorstoreIndexCreator
 from langchain_apify import ApifyDatasetLoader
 from langchain_core.documents import Document
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import ChatOpenAI
 from langchain_openai.embeddings import OpenAIEmbeddings
@@ -129,17 +129,23 @@ loader = ApifyDatasetLoader(
     ),
 )
 
-index = VectorstoreIndexCreator(
-    vectorstore_cls=InMemoryVectorStore, embedding=OpenAIEmbeddings()
-).from_loaders([loader])
+vector_store = InMemoryVectorStore.from_documents(loader.load(), OpenAIEmbeddings())
+retriever = vector_store.as_retriever()
 
 llm = ChatOpenAI(model="gpt-5.4-mini")
+prompt = ChatPromptTemplate.from_template(
+    "Answer the question using only the context below.\n\n"
+    "Context:\n{context}\n\nQuestion: {question}"
+)
 
 query = "What is Apify?"
-result = index.query_with_sources(query, llm=llm)
+docs = retriever.invoke(query)
+context = "\n\n".join(doc.page_content for doc in docs)
+answer = (prompt | llm).invoke({"context": context, "question": query}).content
+sources = ", ".join({doc.metadata["source"] for doc in docs})
 
-print(result["answer"])
-print(result["sources"])
+print(answer)
+print(sources)
 ```
 
 ```text
